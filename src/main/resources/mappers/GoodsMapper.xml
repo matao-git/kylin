@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.matao.pervue.mapper.GoodsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.matao.pervue.entity.Goods">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="price" property="price" />
+        <result column="time" property="time" />
+        <result column="province" property="province" />
+        <result column="city" property="city" />
+        <result column="district" property="district" />
+        <result column="userface" property="userface" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, price, time, province, city, district, userface
+    </sql>
+    <resultMap id="voMap" type="com.matao.pervue.entity.GoodsVo" extends="BaseResultMap">
+        <result property="provinceName" column="provinceName"></result>
+        <result property="cityName" column="cityName"></result>
+        <result property="districtName" column="districtName"></result>
+        <result property="tids" column="tids"></result>
+        <result property="tnames" column="tnames"></result>
+        <result property="tinfos" column="tinfos"></result>
+
+    </resultMap>
+
+    <select id="selectPageVo" resultMap="voMap">
+        SELECT g.*, p.province provinceName,
+        IF (c.city = '',p.province,c.city) cityName,
+        IF (d.district = '',c.city,d.district) districtName,
+        GROUP_CONCAT(t.id) tids,
+        GROUP_CONCAT(t.name) tnames,
+        GROUP_CONCAT(t.info) tinfos
+        FROM  goods g
+        LEFT JOIN nation p ON g.province = p.id
+        LEFT JOIN nation c ON g.city = c.id
+        LEFT JOIN nation d ON g.district = d.id
+        LEFT JOIN goods_type gs ON gs.gid = g.id
+        LEFT JOIN type t ON t.id = gs.tid
+        <where>
+            <if test="goodsVo!=null">
+                <if test="goodsVo.name!=null and goodsVo.name!=''">
+                    and g.name like concat('%',#{goodsVo.name},'%')
+                </if>
+                <if test="goodsVo.priceSmall!=null and goodsVo.priceSmall!=''">
+                    and g.price >= #{goodsVo.priceSmall}
+                </if>
+                <if test="goodsVo.priceBig!=null and goodsVo.priceBig!=''">
+                    and  g.price  &lt;= #{goodsVo.priceBig}
+                </if>
+            </if>
+        </where>
+        GROUP BY g.id
+    </select>
+
+
+</mapper>

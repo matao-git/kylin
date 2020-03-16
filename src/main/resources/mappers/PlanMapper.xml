@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.matao.pervue.mapper.PlanMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.matao.pervue.entity.Plan">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="amount" property="amount" />
+        <result column="manger" property="manger" />
+        <result column="content" property="content" />
+        <result column="deptId" property="deptId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, amount, manger, content, deptId
+    </sql>
+
+    <resultMap id="mapVo" type="com.matao.pervue.entity.PlanVo" extends="BaseResultMap">
+        <result property="dname" column="dname"></result>
+    </resultMap>
+
+    <select id="selectPageVo" resultMap="mapVo">
+        select p.*,d.name dname
+        from plan p
+        LEFT JOIN dept d
+        on p.id = d.id
+        <where>
+            <if test="vo.name != null">
+                <if test="vo.name!=null and vo.name != ''">
+                    and p.name like concat('%',#{vo.name},'%')
+                </if>
+            </if>
+        </where>
+    </select>
+
+</mapper>
